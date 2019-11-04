@@ -70,6 +70,7 @@ function HFace() {
             vertices.push(h.head);
             h = h.next;
         }
+
         return vertices;
     }
 
@@ -87,15 +88,15 @@ function HFace() {
 
         // First vertex in triangle for area
         // Stays constant while iterate through other vertices
-        let a = vertices[0];
+        let a = vertices[0].pos;
 
         // Other 2 vertices for calling get triangle area
         let b;
         let c;
 
         for(let i = 0; i < numTriangles; i++) {
-            b = vertices[i+1];
-            c = vertices[i+2];
+            b = vertices[i+1].pos;
+            c = vertices[i+2].pos;
 
             area += getTriangleArea(a, b, c);
         }
@@ -110,8 +111,23 @@ function HFace() {
      */
     this.getNormal = function() {
         let normal = vec3.create();
-        // TODO: Fill this in
-        
+
+        // cross 2 edges and normalize them
+        let vertices = this.getVertices();
+        let vert0 = vertices[0].pos;
+        let vert1 = vertices[1].pos;
+        let vert2 = vertices[2].pos;
+
+        let edge1 = vec3.create();
+        vec3.subtract(edge1, vert0, vert1);
+
+        let edge2 = vec3.create();
+        vec3.subtract(edge2, vert0, vert2);
+
+        vec3.cross(normal, edge1, edge2);
+
+        vec3.normalize(normal, normal); 
+
         return normal;
     }
 }
@@ -178,8 +194,17 @@ function HVertex(pos, color) {
      */
     this.getNormal = function() {
         let normal = vec3.fromValues(1, 0, 0); // TODO: This is a dummy value
-        // TODO: Fill this in 
-        // Hint: use this.getAttachedFaces(), face.getArea(), and face.getNormal() to help
+        let weight = 0.0;
+
+        let faces = this.getAttachedFaces();
+
+        for (let i = 0; i < faces.length; i++) {
+            let face = faces[i];
+            weight += face.getArea();
+            vec3.scaleAndAdd(normal, normal, face.getNormal(), face.getArea());
+        }
+
+        normal = vec3.scale(normal, normal, 1/weight);
 
         return normal;
     }
