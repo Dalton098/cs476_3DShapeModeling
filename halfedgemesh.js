@@ -42,7 +42,14 @@ function HFace() {
         if (this.h === null) {
             return [];
         }
-        // TODO: Fill this in
+        
+        let h = this.h;
+        let edges = [];
+
+        do {
+            edges.push(h);
+            h = h.next;
+        } while (h != this.h)
 
         return edges;
     }
@@ -73,8 +80,25 @@ function HFace() {
      */
     this.getArea = function() {
         let area = 0.0;
-        // TODO: Fill this in (you can use mini assignment 1 to help)
-        // Remember, there are n-2 triangles in an n-gon
+
+        let vertices = this.getVertices();
+        let edges = this.getEdges();
+        let numTriangles = edges.length - 2;
+
+        // First vertex in triangle for area
+        // Stays constant while iterate through other vertices
+        let a = vertices[0];
+
+        // Other 2 vertices for calling get triangle area
+        let b;
+        let c;
+
+        for(let i = 0; i < numTriangles; i++) {
+            b = vertices[i+1];
+            c = vertices[i+2];
+
+            area += getTriangleArea(a, b, c);
+        }
 
         return area;
     }
@@ -108,8 +132,16 @@ function HVertex(pos, color) {
         if (this.h === null) {
             return [];
         }
-        // TODO: Fill this in (a do while loop works well)
-        return [];
+
+        let vertices = [];
+        let h = this.h;
+
+        do {
+            vertices.push(h.head);
+            h = h.pair.next;
+        } while (h != this.h)
+
+        return vertices;
     }
 
     /**
@@ -122,8 +154,20 @@ function HVertex(pos, color) {
         if (this.h === null) {
             return [];
         }
-        // TODO: Fill this in (this is very similar to getVertexNeighbors)
-        return [];
+
+        let faces = [];
+        let h = this.h;
+
+        do {
+
+            if (h.face !== null) {
+            faces.push(h.face);
+            }
+
+            h = h.pair.next;
+        } while (h != this.h)
+
+        return faces;
     }
 
     /**
@@ -141,6 +185,33 @@ function HVertex(pos, color) {
     }
 }
 
+/**
+ * Given three 3D vertices a, b, and c, compute the area 
+ * of the triangle they span
+ * @param {vec3} a First point
+ * @param {vec3} b Second point
+ * @param {vec3} c Third point
+ * 
+ * @return {float} Area of the triangle
+ */
+function getTriangleArea(a, b, c) {
+
+    let ab = vec3.create();
+    let ac = vec3.create();
+
+    vec3.subtract(ab, b, a);
+    vec3.subtract(ac, c, a);
+
+    crossProduct = vec3.create();
+
+    vec3.cross(crossProduct, ab, ac)
+
+    magCrossProduct = Math.sqrt(vec3.dot(crossProduct, crossProduct));
+
+    area = (1/2) * magCrossProduct;
+
+    return area;
+}
 
 function HedgeMesh() {
     PolyMesh(this); // Initialize common functions/variables
