@@ -434,7 +434,7 @@ function HedgeMesh() {
      */
     this.inflateDeflate = function (fac) {
 
-        for(vertex of this.vertices) {
+        for (vertex of this.vertices) {
             vec3.scaleAndAdd(vertex.pos, vertex.pos, vertex.getNormal(), fac);
         }
 
@@ -473,24 +473,26 @@ function HedgeMesh() {
      *                 to a unique cycle
      */
     this.getBoundaryCycles = function () {
-        
+
         let cycles = [];
-        let tempCycle =  [];
+        let tempCycle = [];
 
-        for(let edge of this.edges) {
+        for (let edge of this.edges) {
 
-            if(edge.visited === true) {
+            if (edge.visited === true) {
                 break;
             }
 
-            if(edge.face === null) {
+            if (edge.face === null) {
                 tempCycle.push(edge);
             }
 
             edge.checked = true;
         }
 
-        cycles.push(tempCycle);
+        if (tempCycle.length !== 0) {
+            cycles.push(tempCycle);
+        }
 
         return cycles;
     }
@@ -503,10 +505,19 @@ function HedgeMesh() {
      */
     this.getGenus = function () {
         let genus = -1;
-        // TODO: Fill this in (hint: there are two half edges for every edge!)
+
+        let isWatertight = this.getBoundaryCycles().length === 0;
+
+        let numEdges = this.edges.length / 2;
+        let numFaces = this.faces.length;
+        let numVertices = this.vertices.length;
+
+        if (isWatertight) {
+            euler = numVertices - numEdges + numFaces;
+            genus = (2 - euler) / 2
+        }
 
         return genus;
-
     }
 
     /**
