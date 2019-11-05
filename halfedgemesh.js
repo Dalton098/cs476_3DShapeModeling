@@ -10,6 +10,7 @@ function HEdge() {
     this.pair = null; // Half edge on opposite face
     this.prev = null; // Previous half edge in CCW order around left face
     this.next = null; // Next half edge in CCW order around left face
+    this.checked = false; // Used in boundary cycles
 
     /**
      * Return a list of the two vertices attached to this edge,
@@ -432,7 +433,10 @@ function HedgeMesh() {
      *                    If negative, the mesh will deflate.
      */
     this.inflateDeflate = function (fac) {
-        // TODO: Fill this in
+
+        for(vertex of this.vertices) {
+            vec3.scaleAndAdd(vertex.pos, vertex.pos, vertex.getNormal(), fac);
+        }
 
         this.needsDisplayUpdate = true;
     }
@@ -469,9 +473,24 @@ function HedgeMesh() {
      *                 to a unique cycle
      */
     this.getBoundaryCycles = function () {
+        
         let cycles = [];
-        // TODO: Fill this in (hint: Add a variable to an edge which
-        // stores whether this edge has been checked yet)
+        let tempCycle =  [];
+
+        for(let edge of this.edges) {
+
+            if(edge.visited === true) {
+                break;
+            }
+
+            if(edge.face === null) {
+                tempCycle.push(edge);
+            }
+
+            edge.checked = true;
+        }
+
+        cycles.push(tempCycle);
 
         return cycles;
     }
