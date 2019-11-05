@@ -18,7 +18,7 @@ function HEdge() {
      * @returns {list} A 2-element list of HVertex objects corresponding
      *                  to vertices attached to this edge
      */
-    this.getVertices = function() {
+    this.getVertices = function () {
         let ret = [];
         if (!(this.head === null) && !(this.prev === null)) {
             if (!(this.prev.head === null)) {
@@ -38,11 +38,11 @@ function HFace() {
      * @returns {list} A list of HEdge objects corresponding
      *                 to edges at the boundary of this face
      */
-    this.getEdges = function() {
+    this.getEdges = function () {
         if (this.h === null) {
             return [];
         }
-        
+
         let h = this.h;
         let edges = [];
 
@@ -60,7 +60,7 @@ function HFace() {
      * @returns {list} A list of HVertex objects corresponding
      *                 to vertices on this face
      */
-    this.getVertices = function() {
+    this.getVertices = function () {
         if (this.h === null) {
             return [];
         }
@@ -79,7 +79,7 @@ function HFace() {
      * 
      * @returns {float} The area of this face
      */
-    this.getArea = function() {
+    this.getArea = function () {
         let area = 0.0;
 
         let vertices = this.getVertices();
@@ -94,9 +94,9 @@ function HFace() {
         let b;
         let c;
 
-        for(let i = 0; i < numTriangles; i++) {
-            b = vertices[i+1].pos;
-            c = vertices[i+2].pos;
+        for (let i = 0; i < numTriangles; i++) {
+            b = vertices[i + 1].pos;
+            c = vertices[i + 2].pos;
 
             area += getTriangleArea(a, b, c);
         }
@@ -109,24 +109,23 @@ function HFace() {
      * 
      * @returns {vec3} The normal of this face
      */
-    this.getNormal = function() {
+    this.getNormal = function () {
         let normal = vec3.create();
 
-        // cross 2 edges and normalize them
         let vertices = this.getVertices();
         let vert0 = vertices[0].pos;
         let vert1 = vertices[1].pos;
         let vert2 = vertices[2].pos;
 
         let edge1 = vec3.create();
-        vec3.subtract(edge1, vert0, vert1);
-
         let edge2 = vec3.create();
-        vec3.subtract(edge2, vert0, vert2);
+
+        vec3.subtract(edge1, vert1, vert0);
+        vec3.subtract(edge2, vert2, vert0);
 
         vec3.cross(normal, edge1, edge2);
 
-        vec3.normalize(normal, normal); 
+        vec3.normalize(normal, normal);
 
         return normal;
     }
@@ -144,7 +143,7 @@ function HVertex(pos, color) {
      * @returns {list} List of HVertex objects corresponding
      *                 to the attached vertices
      */
-    this.getVertexNeighbors = function() {
+    this.getVertexNeighbors = function () {
         if (this.h === null) {
             return [];
         }
@@ -166,7 +165,7 @@ function HVertex(pos, color) {
      * @returns {list} A list of HFace objects corresponding
      *                  to the incident faces
      */
-    this.getAttachedFaces = function() {
+    this.getAttachedFaces = function () {
         if (this.h === null) {
             return [];
         }
@@ -177,7 +176,7 @@ function HVertex(pos, color) {
         do {
 
             if (h.face !== null) {
-            faces.push(h.face);
+                faces.push(h.face);
             }
 
             h = h.pair.next;
@@ -192,19 +191,18 @@ function HVertex(pos, color) {
      * 
      * @returns {float} The estimated normal
      */
-    this.getNormal = function() {
-        let normal = vec3.fromValues(1, 0, 0); // TODO: This is a dummy value
+    this.getNormal = function () {
+        let normal = vec3.fromValues(0, 0, 0);
         let weight = 0.0;
 
         let faces = this.getAttachedFaces();
 
-        for (let i = 0; i < faces.length; i++) {
-            let face = faces[i];
+        for (face of faces) {
             weight += face.getArea();
             vec3.scaleAndAdd(normal, normal, face.getNormal(), face.getArea());
         }
 
-        normal = vec3.scale(normal, normal, 1/weight);
+        normal = vec3.scale(normal, normal, 1 / weight);
 
         return normal;
     }
@@ -233,37 +231,37 @@ function getTriangleArea(a, b, c) {
 
     magCrossProduct = Math.sqrt(vec3.dot(crossProduct, crossProduct));
 
-    area = (1/2) * magCrossProduct;
+    area = (1 / 2) * magCrossProduct;
 
     return area;
 }
 
 function HedgeMesh() {
     PolyMesh(this); // Initialize common functions/variables
-    
+
     /**
      * @returns {I} A NumTrisx3 Uint16Array of indices into the vertex array
      */
-    this.getTriangleIndices = function() {
+    this.getTriangleIndices = function () {
         let NumTris = 0;
         let allvs = [];
         for (let i = 0; i < this.faces.length; i++) {
             let vsi = this.faces[i].getVertices();
-            allvs.push(vsi.map(function(v){
+            allvs.push(vsi.map(function (v) {
                 return v.ID;
             }));
             NumTris += vsi.length - 2;
         }
-        let I = new Uint16Array(NumTris*3);
+        let I = new Uint16Array(NumTris * 3);
         let i = 0;
         let faceIdx = 0;
         //Now copy over the triangle indices
         while (i < NumTris) {
             let verts = allvs[faceIdx]
             for (let t = 0; t < verts.length - 2; t++) {
-                I[i*3] = verts[0];
-                I[i*3+1] = verts[t+1];
-                I[i*3+2] = verts[t+2];
+                I[i * 3] = verts[0];
+                I[i * 3 + 1] = verts[t + 1];
+                I[i * 3 + 2] = verts[t + 2];
                 i++;
             }
             faceIdx++;
@@ -274,7 +272,7 @@ function HedgeMesh() {
     /**
      * @returns {I} A NEdgesx2 Uint16Array of indices into the vertex array
      */
-    this.getEdgeIndices = function() {
+    this.getEdgeIndices = function () {
         let I = [];
         for (let i = 0; i < this.edges.length; i++) {
             let vs = this.edges[i].getVertices();
@@ -296,7 +294,7 @@ function HedgeMesh() {
      * 
      * @returns {HEdge} The constructed half edge
      */
-    this.addHalfEdge = function(v1, v2, face) {
+    this.addHalfEdge = function (v1, v2, face) {
         const hedge = new HEdge();
         hedge.head = v2; // Points to head vertex of edge
         hedge.face = face;
@@ -315,14 +313,14 @@ function HedgeMesh() {
      * a consistently oriented mesh with vertices specified 
      * in CCW order
      */
-    this.loadFileFromLines = function(lines) {
+    this.loadFileFromLines = function (lines) {
         // Step 1: Consistently orient faces using
         // the basic mesh structure and copy over the result
         const origMesh = new BasicMesh();
         origMesh.loadFileFromLines(lines);
         origMesh.consistentlyOrientFaces();
         origMesh.subtractCentroid();
-        const res = {'vertices':[], 'colors':[], 'faces':[]};
+        const res = { 'vertices': [], 'colors': [], 'faces': [] };
         for (let i = 0; i < origMesh.vertices.length; i++) {
             res['vertices'].push(origMesh.vertices[i].pos);
             res['colors'].push(origMesh.vertices[i].color);
@@ -331,7 +329,7 @@ function HedgeMesh() {
             // These faces should now be consistently oriented
             const vs = origMesh.faces[i].getVertices();
             res['faces'].push(vs.map(
-                function(v) {
+                function (v) {
                     return v.ID;
                 }
             ));
@@ -362,11 +360,11 @@ function HedgeMesh() {
             // Add halfedges
             for (let k = 0; k < vertsi.length; k++) {
                 const v1 = vertsi[k];
-                const v2 = vertsi[(k+1)%vertsi.length];
+                const v2 = vertsi[(k + 1) % vertsi.length];
                 // Add each half edge
                 const hedge = this.addHalfEdge(v1, v2, face);
                 // Store half edge in hash table
-                let key = v1.ID+"_"+v2.ID;
+                let key = v1.ID + "_" + v2.ID;
                 str2Hedge[key] = hedge;
                 face.h = hedge;
             }
@@ -376,8 +374,8 @@ function HedgeMesh() {
             // starting at that vertex
             // (which addHalfEdge has just done)
             for (let k = 0; k < vertsi.length; k++) {
-                vertsi[k].h.next = vertsi[(k+1)%vertsi.length].h;
-                vertsi[(k+1)%vertsi.length].h.prev = vertsi[k].h;
+                vertsi[k].h.next = vertsi[(k + 1) % vertsi.length].h;
+                vertsi[(k + 1) % vertsi.length].h.prev = vertsi[k].h;
             }
         }
 
@@ -388,7 +386,7 @@ function HedgeMesh() {
         for (const key in str2Hedge) {
             const v1v2 = key.split("_");
             let h1 = str2Hedge[key];
-            const other = v1v2[1]+"_"+v1v2[0];
+            const other = v1v2[1] + "_" + v1v2[0];
             if (other in str2Hedge) {
                 h1.pair = str2Hedge[other];
             }
@@ -412,10 +410,10 @@ function HedgeMesh() {
             }
         }
 
-        console.log("Initialized half edge mesh with " + 
-                    this.vertices.length + " vertices, " + 
-                    this.edges.length + " half edges, " + 
-                    this.faces.length + " faces");
+        console.log("Initialized half edge mesh with " +
+            this.vertices.length + " vertices, " +
+            this.edges.length + " half edges, " +
+            this.faces.length + " faces");
 
         this.needsDisplayUpdate = true;
     }
@@ -424,7 +422,7 @@ function HedgeMesh() {
     /////////////////////////////////////////////////////////////
     ////                  GEOMETRIC TASKS                   /////
     /////////////////////////////////////////////////////////////
-    
+
     /**
      * Move each vertex along its normal by a factor
      * 
@@ -433,7 +431,7 @@ function HedgeMesh() {
      *                    If positive, the mesh will inflate.
      *                    If negative, the mesh will deflate.
      */
-    this.inflateDeflate = function(fac) {
+    this.inflateDeflate = function (fac) {
         // TODO: Fill this in
 
         this.needsDisplayUpdate = true;
@@ -446,14 +444,14 @@ function HedgeMesh() {
      * 
      * @param {boolean} smooth If true, smooth.  If false, sharpen
      */
-    this.laplacianSmoothSharpen = function(smooth) {
+    this.laplacianSmoothSharpen = function (smooth) {
         // TODO: Fill this in
 
         this.needsDisplayUpdate = true;
     }
 
     /** Apply some creative per-vertex warp */
-    this.warp = function() {
+    this.warp = function () {
         // TODO: Fill this in
 
         this.needsDisplayUpdate = true;
@@ -470,7 +468,7 @@ function HedgeMesh() {
      *                 its own list of HEdge objects corresponding
      *                 to a unique cycle
      */
-    this.getBoundaryCycles = function() {
+    this.getBoundaryCycles = function () {
         let cycles = [];
         // TODO: Fill this in (hint: Add a variable to an edge which
         // stores whether this edge has been checked yet)
@@ -484,7 +482,7 @@ function HedgeMesh() {
      * 
      * @returns {int} genus if watertight, or -1 if not
      */
-    this.getGenus = function() {
+    this.getGenus = function () {
         let genus = -1;
         // TODO: Fill this in (hint: there are two half edges for every edge!)
 
@@ -496,7 +494,7 @@ function HedgeMesh() {
      * Fill in the boundary cycles with triangles.  The mesh
      * should be watertight at the end
      */
-    this.fillHoles = function() {
+    this.fillHoles = function () {
         // TODO: Fill this in
 
         this.needsDisplayUpdate = true;
@@ -507,13 +505,13 @@ function HedgeMesh() {
     /////////////////////////////////////////////////////////////
     ////                MESH CREATION TASKS                 /////
     /////////////////////////////////////////////////////////////
-    
+
     /**
      * Truncate the mesh by slicing off the tips of each vertex
      * @param {float} fac The amount to go down each edge from the vertex
      *                    (should be between 0 and 1)
      */
-    this.truncate = function(fac) {
+    this.truncate = function (fac) {
         // TODO: Fill this in
 
         this.needsDisplayUpdate = true;
@@ -522,7 +520,7 @@ function HedgeMesh() {
     /**
      * Perform a linear subdivision of the mesh
      */
-    this.subdivideLinear = function() {
+    this.subdivideLinear = function () {
         // TODO: Fill this in
 
         this.needsDisplayUpdate = true;
@@ -531,7 +529,7 @@ function HedgeMesh() {
     /** 
      * Perform Loop subdivision on the mesh
      */
-    this.subdivideLoop = function() {
+    this.subdivideLoop = function () {
         // TODO: Fill this in
 
         this.needsDisplayUpdate = true;
