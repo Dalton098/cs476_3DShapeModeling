@@ -451,6 +451,44 @@ function HedgeMesh() {
     this.laplacianSmoothSharpen = function (smooth) {
         // TODO: Fill this in
 
+        let smoothSharpCoeff = -1;
+
+        if (smooth) {
+            smoothSharpCoeff = 1;
+        }
+
+        let neighbors;
+        
+        // let tempVertices = [];
+        console.log(this.vertices);
+        for (vertex of this.vertices) {
+
+            neighbors = vertex.getVertexNeighbors();
+
+            let toVectorsAvg = vec3.create();;
+            let tempVec = vec3.create();
+
+            for (neighbor of neighbors) {
+                vec3.subtract(tempVec, neighbor.pos, vertex.pos);
+                vec3.add(toVectorsAvg, toVectorsAvg,tempVec);
+            }
+
+            vec3.scale(toVectorsAvg, toVectorsAvg, 1/(neighbors.length));
+            vec3.scaleAndAdd(vertex, vertex, toVectorsAvg, smoothSharpCoeff);
+            // tempVertices.push(vertex);
+        }
+
+        // console.log(tempVertices);
+        // this.vertices = tempVertices;
+
+        // If statement which toggles between 1 and -1 for the adding/subtracting
+        // For loop through all the vertices getting the nearest neighbors
+        // Store nearest neighbors in a list and then use them to calculate
+        // the vector from the position of the vertex to the pos of the nearest neighbors
+        // store these vectors as well and average them
+        // Then adjust the vertex.pos by that
+        // REMEMBER THESE ARE VEC3 SO GOTTA DO SOME JANK TO DO BASIC OPERATIONS
+
         this.needsDisplayUpdate = true;
     }
 
