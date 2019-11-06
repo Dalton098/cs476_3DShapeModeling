@@ -449,7 +449,6 @@ function HedgeMesh() {
      * @param {boolean} smooth If true, smooth.  If false, sharpen
      */
     this.laplacianSmoothSharpen = function (smooth) {
-        // TODO: Fill this in
 
         let smoothSharpCoeff = -1;
 
@@ -458,36 +457,31 @@ function HedgeMesh() {
         }
 
         let neighbors;
-        
-        // let tempVertices = [];
-        console.log(this.vertices);
-        for (vertex of this.vertices) {
+        let vertexPositions = [];
 
-            neighbors = vertex.getVertexNeighbors();
+        // Loops through the vertices and takes the average of the neighbors of the vertices
+        // This is then added or subtracted from the vertices position and stored in a temporary location
+        for (let i = 0; i < this.vertices.length; i++) {
+            neighbors = this.vertices[i].getVertexNeighbors();
 
-            let toVectorsAvg = vec3.create();;
+            let toVectorsAvg = vec3.create();
             let tempVec = vec3.create();
 
             for (neighbor of neighbors) {
-                vec3.subtract(tempVec, neighbor.pos, vertex.pos);
-                vec3.add(toVectorsAvg, toVectorsAvg,tempVec);
+                vec3.subtract(tempVec, neighbor.pos, this.vertices[i].pos);
+                vec3.add(toVectorsAvg, toVectorsAvg, tempVec);
             }
 
-            vec3.scale(toVectorsAvg, toVectorsAvg, 1/(neighbors.length));
-            vec3.scaleAndAdd(vertex, vertex, toVectorsAvg, smoothSharpCoeff);
-            // tempVertices.push(vertex);
+            vec3.scale(toVectorsAvg, toVectorsAvg, 1 / neighbors.length);
+            vec3.scaleAndAdd(tempVec, this.vertices[i].pos, toVectorsAvg, smoothSharpCoeff);
+
+            vertexPositions[i] = tempVec;
         }
 
-        // console.log(tempVertices);
-        // this.vertices = tempVertices;
-
-        // If statement which toggles between 1 and -1 for the adding/subtracting
-        // For loop through all the vertices getting the nearest neighbors
-        // Store nearest neighbors in a list and then use them to calculate
-        // the vector from the position of the vertex to the pos of the nearest neighbors
-        // store these vectors as well and average them
-        // Then adjust the vertex.pos by that
-        // REMEMBER THESE ARE VEC3 SO GOTTA DO SOME JANK TO DO BASIC OPERATIONS
+        // Unloading the new positions back into the vertices
+        for (let i = 0; i < this.vertices.length; i++) {
+            this.vertices[i].pos = vertexPositions[i];
+        }
 
         this.needsDisplayUpdate = true;
     }
@@ -546,11 +540,12 @@ function HedgeMesh() {
 
         let isWatertight = this.getBoundaryCycles().length === 0;
 
-        let numEdges = this.edges.length / 2;
-        let numFaces = this.faces.length;
-        let numVertices = this.vertices.length;
-
         if (isWatertight) {
+
+            let numEdges = this.edges.length / 2;
+            let numFaces = this.faces.length;
+            let numVertices = this.vertices.length;
+
             euler = numVertices - numEdges + numFaces;
             genus = (2 - euler) / 2
         }
