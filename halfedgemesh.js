@@ -10,7 +10,7 @@ function HEdge() {
     this.pair = null; // Half edge on opposite face
     this.prev = null; // Previous half edge in CCW order around left face
     this.next = null; // Next half edge in CCW order around left face
-    this.checked = false; // Used in boundary cycles
+    this.visited = false; // Used in boundary cycles
 
     /**
      * Return a list of the two vertices attached to this edge,
@@ -508,22 +508,31 @@ function HedgeMesh() {
 
         let cycles = [];
         let tempCycle = [];
+        let tempHEdge;
 
         for (let edge of this.edges) {
 
-            if (edge.visited === true) {
-                break;
+            tempHEdge = edge;
+
+            while (tempHEdge.visited === false && tempHEdge.face === null) {
+
+                tempCycle.push(tempHEdge);
+                tempHEdge.visited = true;
+
+                tempHEdge = tempHEdge.next;
             }
 
-            if (edge.face === null) {
-                tempCycle.push(edge);
+            if (tempCycle.length !== 0) {
+                cycles.push(tempCycle);
+                tempCycle = [];
             }
 
-            edge.checked = true;
         }
 
-        if (tempCycle.length !== 0) {
-            cycles.push(tempCycle);
+        // Have to unvisit them because this function gets called 
+        // everytime the scene is altered (like moving the camera)
+        for (let edge of this.edges) {
+            edge.visited = false;
         }
 
         return cycles;
