@@ -489,8 +489,6 @@ function HedgeMesh() {
     /** Apply some creative per-vertex warp */
     this.warp = function () {
 
-        let radius = 0.5;
-
         for(let i = 0; i < this.vertices.length; i+=1) {
 
             // Second Attempt at Warping
@@ -505,7 +503,6 @@ function HedgeMesh() {
             this.vertices[i].pos[2] = z;
             
         }
-
 
         this.needsDisplayUpdate = true;
     }
