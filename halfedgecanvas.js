@@ -204,10 +204,15 @@ function HalfEdgeCanvas(glcanvas, shadersrelpath) {
         glcanvas.mesh.laplacianSmoothSharpen(false);
         requestAnimFrame(glcanvas.repaint);
     }
+    glcanvas.warp = function() {
+        glcanvas.mesh.warp();
+        requestAnimFrame(glcanvas.repaint);
+    }
     geomMenu.add(glcanvas, 'inflationFac', -1, 1);
     geomMenu.add(glcanvas, 'inflateDeflate');
     geomMenu.add(glcanvas, 'laplacianSmooth');
     geomMenu.add(glcanvas, 'laplacianSharpen');
+    geomMenu.add(glcanvas, 'warp');
 
     let topoMenu = gui.addFolder("Topological Tasks");
     glcanvas.showBoundaries = false;
