@@ -491,31 +491,18 @@ function HedgeMesh() {
 
         let radius = 0.5;
 
-        for(let i = 0; i < this.vertices.length; i+=2) {
+        for(let i = 0; i < this.vertices.length; i+=1) {
 
             // Second Attempt at Warping
-            // Increment at 2 or higher so that the mesh twist      
+            // Warp the mesh twice for an interesting visual (flattens into 2D)
+            // Increment by 1 when using this   
             x = this.vertices[i].pos[0];
             y = this.vertices[i].pos[1];
             z = this.vertices[i].pos[2];
 
-            this.vertices[i].pos[0] = y;
-            this.vertices[i].pos[1] = x;
+            this.vertices[i].pos[0] = x * Math.cos(x);
+            this.vertices[i].pos[1] = y * Math.sin(x);
             this.vertices[i].pos[2] = z;
-
-
-            // First Attempt at Warping
-            // Increment by 1 when using this
-
-            // x = this.vertices[i].pos[0];
-
-            // t = Math.acos(x);
-            // y = radius * Math.sin(10 * t);
-            // z = radius * t;
-
-            // this.vertices[i].pos[0] = x;
-            // this.vertices[i].pos[1] = y;
-            // this.vertices[i].pos[2] = z;
             
         }
 
